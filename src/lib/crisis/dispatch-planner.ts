@@ -226,11 +226,46 @@ function buildDispatchPrompt(description: string, requestedType?: IncidentType) 
     "Analyze the report and decide required responder teams and how many responders per team.",
     "Allowed team roles: fire, medical, security.",
     "Return JSON only and keep counts realistic (1 to 4 per role).",
+    "Do not include markdown fences or explanatory text outside the JSON object.",
     "Include multiple roles if the report suggests combined emergencies (for example fire + injuries).",
     "Use security for threats, violence, intrusions, weapons, evacuation/crowd risk, or scene safety support.",
     typeHint,
     `Emergency report: ${description || "No details provided"}`,
   ].join("\n");
+}
+
+function supportsNativeJsonMode(modelName: string) {
+  const normalized = modelName.toLowerCase();
+  return normalized.includes("gemini") && !normalized.includes("gemma");
+}
+
+function parseJsonPayload(raw: string) {
+  const candidates: string[] = [raw.trim()];
+
+  const fencedMatch = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fencedMatch?.[1]) {
+    candidates.push(fencedMatch[1].trim());
+  }
+
+  const firstBrace = raw.indexOf("{");
+  const lastBrace = raw.lastIndexOf("}");
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    candidates.push(raw.slice(firstBrace, lastBrace + 1).trim());
+  }
+
+  for (const candidate of candidates) {
+    if (!candidate) {
+      continue;
+    }
+
+    try {
+      return JSON.parse(candidate) as unknown;
+    } catch {
+      // Keep trying alternate extraction candidates.
+    }
+  }
+
+  return null;
 }
 
 const dispatchResponseSchema = {
@@ -288,14 +323,19 @@ export async function planIncidentDispatch(input: {
   }
 
   try {
+    const useNativeJsonMode = supportsNativeJsonMode(GEMINI_MODEL);
     const response = await client.models.generateContent({
       model: GEMINI_MODEL,
       contents: buildDispatchPrompt(normalizedDescription, input.requestedType),
-      config: {
-        temperature: 0.2,
-        responseMimeType: "application/json",
-        responseSchema: dispatchResponseSchema,
-      },
+      config: useNativeJsonMode
+        ? {
+            temperature: 0.2,
+            responseMimeType: "application/json",
+            responseSchema: dispatchResponseSchema,
+          }
+        : {
+            temperature: 0.2,
+          },
     });
 
     const raw = response.text?.trim();
@@ -304,7 +344,13 @@ export async function planIncidentDispatch(input: {
       return fallback;
     }
 
-    const parsed = aiPlanSchema.parse(JSON.parse(raw));
+    const payload = parseJsonPayload(raw);
+
+    if (!payload) {
+      return fallback;
+    }
+
+    const parsed = aiPlanSchema.parse(payload);
 
     return {
       primaryType: parsed.primaryType,
@@ -314,7 +360,7 @@ export async function planIncidentDispatch(input: {
       source: "ai",
     };
   } catch (error) {
-    console.error("Gemini dispatch planning failed", error);
+    console.error("SafeWave AI dispatch planning failed", error);
     return fallback;
   }
 }
