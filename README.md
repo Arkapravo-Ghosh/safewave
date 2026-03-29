@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Safewave
 
-## Getting Started
+Next.js app with Drizzle ORM configured for PostgreSQL.
 
-First, run the development server:
+## Environment Variables
+
+Drizzle is configured to use these values from `.env`:
+
+- `PGHOST`
+- `PGDATABASE`
+- `PGUSER`
+- `PGPASSWORD`
+- `PGSSLMODE`
+- `PGCHANNELBINDING`
+- `PGPORT` (optional, defaults to `5432`)
+- `AUTH_SECRET` (required for signed auth session cookies)
+
+Generate a strong `AUTH_SECRET` value:
+
+```bash
+openssl rand -base64 32
+```
+
+## Database Setup
+
+Generate migration files from `src/db/schema.ts`:
+
+```bash
+npm run db:generate
+```
+
+Apply generated migrations:
+
+```bash
+npm run db:migrate
+```
+
+Open Drizzle Studio:
+
+```bash
+npm run db:studio
+```
+
+## Auth and Roles
+
+Auth is configured with:
+
+- `bcryptjs` for password hashing
+- `jose` for signed JWT session cookies (`safewave_session`)
+- Route protection via `src/proxy.ts`
+
+Supported roles:
+
+- `user` (default on signup)
+- `admin`
+- `superadmin`
+
+App routes:
+
+- `/login`
+- `/signup`
+- `/dashboard` (any authenticated user)
+- `/admin` (admin + superadmin)
+- `/superadmin` (superadmin only)
+
+To promote a user role in Postgres:
+
+```sql
+UPDATE users SET role = 'admin' WHERE email = 'admin@example.com';
+UPDATE users SET role = 'superadmin' WHERE email = 'owner@example.com';
+```
+
+## Project Structure
+
+- `drizzle.config.ts`: Drizzle Kit config for migration generation and DB credentials.
+- `src/db/schema.ts`: Drizzle schema definition.
+- `src/db/index.ts`: server-only Drizzle database client.
+
+## Using the DB Client
+
+Use `db` from server code (Server Components, Route Handlers, or Server Actions).
+
+```ts
+import { db, schema } from "@/db";
+
+const users = await db.select().from(schema.users);
+```
+
+## Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
