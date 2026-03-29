@@ -11,7 +11,7 @@ import type {
   ResponderRole,
 } from "@/lib/crisis/types";
 
-const GEMINI_MODEL = "gemini-2.5-flash-lite";
+const GEMINI_MODEL = process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash-lite";
 const MAX_RESPONDERS_PER_ROLE = 4;
 
 const NUMBER_WORDS: Record<string, number> = {

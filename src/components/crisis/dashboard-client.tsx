@@ -423,7 +423,7 @@ export function DashboardClient({ initialIncidents, userName, userId }: Dashboar
     }
 
     if (!dispatchPreview) {
-      setMessage("Gemini dispatch preview is required before sending SOS.");
+      setMessage("SafeWave AI dispatch preview is required before sending SOS.");
       setPending(false);
       return;
     }
@@ -541,7 +541,7 @@ export function DashboardClient({ initialIncidents, userName, userId }: Dashboar
             disabled={pending || previewPending || !gpsLocation}
             className="w-full"
           >
-            {previewPending ? "Analyzing with Gemini..." : pending ? "Sending SOS..." : "Review SOS"}
+            {previewPending ? "Analysing with SafeWave AI..." : pending ? "Sending SOS..." : "Review SOS"}
           </Button>
           {message ? <p className="text-sm text-muted-foreground">{message}</p> : null}
         </CardContent>
@@ -573,7 +573,7 @@ export function DashboardClient({ initialIncidents, userName, userId }: Dashboar
                   </div>
                 </>
               ) : (
-                "Gemini dispatch preview unavailable"
+                "SafeWave AI dispatch preview unavailable"
               )}
             </div>
             <div className="mt-3 rounded-md border border-border/70 bg-muted/40 p-3 text-sm text-foreground/90">

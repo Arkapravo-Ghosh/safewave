@@ -50,7 +50,7 @@ export function TriggerForm() {
     setMessage("");
 
     if (!dispatchPreview) {
-      setMessage("Gemini dispatch preview is required before sending SOS.");
+      setMessage("SafeWave AI dispatch preview is required before sending SOS.");
       setPending(false);
       return;
     }
@@ -110,7 +110,7 @@ export function TriggerForm() {
           />
 
           <Button onClick={reviewTrigger} disabled={pending || previewPending} className="w-full">
-            {previewPending ? "Analyzing with Gemini..." : pending ? "Sending SOS..." : "Review SOS"}
+            {previewPending ? "Analysing with SafeWave AI..." : pending ? "Sending SOS..." : "Review SOS"}
           </Button>
 
           {message && <p className="text-sm text-muted-foreground">{message}</p>}
@@ -143,7 +143,7 @@ export function TriggerForm() {
                   </div>
                 </>
               ) : (
-                "Gemini dispatch preview unavailable"
+                "SafeWave AI dispatch preview unavailable"
               )}
             </div>
             <div className="mt-4 flex justify-end gap-2">
