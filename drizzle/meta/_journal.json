@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1774790396793,
-      "tag": "0000_loud_sage",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1774791002380,
-      "tag": "0001_mighty_ultimates",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1774792002381,
-      "tag": "0002_safewave_crisis_core",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1774793002382,
-      "tag": "0003_rbac_responder_ownership",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1774794002383,
-      "tag": "0004_incident_gps_coordinates",
+      "when": 1774865347641,
+      "tag": "0000_baseline_schema",
       "breakpoints": true
     }
   ]
