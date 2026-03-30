@@ -42,7 +42,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (pathname === "/trigger" || pathname.startsWith("/trigger/")) {
+  if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
     if (!session) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
@@ -52,13 +52,9 @@ export async function proxy(request: NextRequest) {
     }
   }
 
-  if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
+  if (pathname === "/history" || pathname.startsWith("/history/")) {
     if (!session) {
       return NextResponse.redirect(new URL("/login", request.url));
-    }
-
-    if (session.role !== "user") {
-      return NextResponse.redirect(new URL(homeRoute, request.url));
     }
   }
 
@@ -104,7 +100,7 @@ export const config = {
     "/login",
     "/signup",
     "/dashboard/:path*",
-    "/trigger/:path*",
+    "/history/:path*",
     "/responder/:path*",
     "/admin/:path*",
     "/superadmin/:path*",

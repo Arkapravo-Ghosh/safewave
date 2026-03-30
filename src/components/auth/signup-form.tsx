@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { signup, type AuthActionState } from "@/app/(auth)/actions";
+import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,12 +28,17 @@ export function SignupForm() {
   const [state, formAction] = useActionState(signup, INITIAL_STATE);
 
   return (
-    <Card className="mx-auto w-full max-w-md rounded-3xl border border-border/70 bg-card/90 py-6 shadow-lg shadow-primary/10 backdrop-blur">
-      <CardHeader>
-        <CardTitle className="text-xl">Create your account</CardTitle>
-        <CardDescription>Every new account starts with the default user role.</CardDescription>
+    <Card className="mx-auto w-full max-w-md rounded-3xl border border-border/70 bg-card/90 backdrop-blur">
+      <CardHeader className="gap-3">
+        <Badge variant="outline" className="w-fit rounded-full border-border/70 bg-background/80 px-3">
+          Quick setup
+        </Badge>
+        <CardTitle className="text-2xl">Create your SafeWave account</CardTitle>
+        <CardDescription className="text-pretty">
+          Create your account to request help quickly and follow updates in one place.
+        </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-4">
         <form action={formAction} className="flex flex-col gap-5">
           <FieldGroup>
             <Field data-invalid={Boolean(state.message)}>
@@ -64,8 +70,12 @@ export function SignupForm() {
           ) : null}
           <SubmitButton />
         </form>
+
+        <div className="rounded-xl border border-border/70 bg-background/75 p-3 text-xs text-muted-foreground">
+          You can request help immediately after signup.
+        </div>
       </CardContent>
-      <CardFooter className="justify-center">
+      <CardFooter className="justify-center border-t border-border/70 bg-muted/30">
         <p className="text-sm text-muted-foreground/90">
           Already have an account?{" "}
           <Link href="/login" className="text-primary underline underline-offset-4">

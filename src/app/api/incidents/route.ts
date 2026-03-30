@@ -1,10 +1,18 @@
 import { z } from "zod";
 
 import { getApiSession } from "@/lib/auth/api-session";
-import { createIncident, listIncidentsForResponderUser, listIncidentsWithDetails } from "@/lib/crisis/incidents";
+import {
+  createIncident,
+  listIncidentsForResponderUser,
+  listIncidentsForResponderUserPage,
+  listIncidentsWithDetails,
+  listIncidentsWithDetailsPage,
+} from "@/lib/crisis/incidents";
 import { ensureRealtimeServer } from "@/lib/realtime/ws-server";
 
 export const runtime = "nodejs";
+
+const INCIDENT_HISTORY_MAX_LIMIT = 50;
 
 const createIncidentSchema = z.object({
   description: z.string().max(600).optional(),
@@ -17,12 +25,57 @@ const createIncidentSchema = z.object({
     .optional(),
 });
 
-export async function GET() {
+function parsePositiveInt(value: string | null, fallback: number) {
+  if (!value) {
+    return fallback;
+  }
+
+  const parsed = Number.parseInt(value, 10);
+
+  if (!Number.isFinite(parsed)) {
+    return fallback;
+  }
+
+  return parsed;
+}
+
+export async function GET(request: Request) {
   ensureRealtimeServer();
   const session = await getApiSession();
 
   if (!session) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const requestUrl = new URL(request.url);
+  const requestedLimit = parsePositiveInt(requestUrl.searchParams.get("limit"), -1);
+  const requestedOffset = parsePositiveInt(requestUrl.searchParams.get("offset"), 0);
+  const usePagination = requestedLimit > 0;
+  const limit = Math.max(1, Math.min(requestedLimit, INCIDENT_HISTORY_MAX_LIMIT));
+  const offset = Math.max(0, requestedOffset);
+
+  if (usePagination) {
+    if (session.role === "user") {
+      const page = await listIncidentsWithDetailsPage({
+        triggeredByUserId: session.sub,
+        limit,
+        offset,
+      });
+
+      return Response.json(page);
+    }
+
+    if (session.role === "responder") {
+      const page = await listIncidentsForResponderUserPage(session.sub, {
+        limit,
+        offset,
+      });
+
+      return Response.json(page);
+    }
+
+    const page = await listIncidentsWithDetailsPage({ limit, offset });
+    return Response.json(page);
   }
 
   let incidents;

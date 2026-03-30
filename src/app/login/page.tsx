@@ -16,7 +16,7 @@ export default async function LoginPage() {
     <AuthShell
       badge="Sign in"
       title="Welcome back to SafeWave"
-      description="Access your workspace to manage account roles, monitor session security, and continue where you left off."
+      description="Sign in to request help, follow emergency updates, or continue rescue coordination."
     >
       <LoginForm />
     </AuthShell>

@@ -5,6 +5,7 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 
 import { login, type AuthActionState } from "@/app/(auth)/actions";
+import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,12 +28,15 @@ export function LoginForm() {
   const [state, formAction] = useActionState(login, INITIAL_STATE);
 
   return (
-    <Card className="mx-auto w-full max-w-md rounded-3xl border border-border/70 bg-card/90 py-6 shadow-lg shadow-primary/10 backdrop-blur">
-      <CardHeader>
-        <CardTitle className="text-xl">Sign in to your account</CardTitle>
-        <CardDescription>Use your registered email and password to continue.</CardDescription>
+    <Card className="mx-auto w-full max-w-md rounded-3xl border border-border/70 bg-card/90 backdrop-blur">
+      <CardHeader className="gap-3">
+        <Badge variant="outline" className="w-fit rounded-full border-border/70 bg-background/80 px-3">
+          Welcome back
+        </Badge>
+        <CardTitle className="text-2xl">Sign in to SafeWave</CardTitle>
+        <CardDescription className="text-pretty">Sign in to request help, track updates, or continue team response work.</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex flex-col gap-4">
         <form action={formAction} className="flex flex-col gap-5">
           <FieldGroup>
             <Field data-invalid={Boolean(state.message)}>
@@ -66,8 +70,12 @@ export function LoginForm() {
           ) : null}
           <SubmitButton />
         </form>
+
+        <div className="rounded-xl border border-border/70 bg-background/75 p-3 text-xs text-muted-foreground">
+          After sign in, we take you to the right dashboard automatically.
+        </div>
       </CardContent>
-      <CardFooter className="justify-center">
+      <CardFooter className="justify-center border-t border-border/70 bg-muted/30">
         <p className="text-sm text-muted-foreground/90">
           New to SafeWave?{" "}
           <Link href="/signup" className="text-primary underline underline-offset-4">

@@ -40,6 +40,25 @@ interface AssignmentTeamPlan {
   rationale: string;
 }
 
+interface IncidentFilterOptions {
+  triggeredByUserId?: string;
+  assignedResponderId?: string;
+}
+
+export interface IncidentHistoryPageOptions extends IncidentFilterOptions {
+  limit?: number;
+  offset?: number;
+}
+
+export interface IncidentHistoryPage {
+  incidents: IncidentWithDetails[];
+  hasMore: boolean;
+  nextOffset: number | null;
+}
+
+const INCIDENT_HISTORY_DEFAULT_LIMIT = 12;
+const INCIDENT_HISTORY_MAX_LIMIT = 50;
+
 function normalizeLocationHint(text: string) {
   const knownZones = [
     "north wing",
@@ -151,10 +170,7 @@ function serializeIncidentRows(
   return [...map.values()];
 }
 
-export async function listIncidentsWithDetails(options?: {
-  triggeredByUserId?: string;
-  assignedResponderId?: string;
-}) {
+function buildIncidentConditions(options?: IncidentFilterOptions) {
   const conditions: SQL[] = [];
 
   if (options?.triggeredByUserId) {
@@ -164,6 +180,56 @@ export async function listIncidentsWithDetails(options?: {
   if (options?.assignedResponderId) {
     conditions.push(eq(assignments.responderId, options.assignedResponderId));
   }
+
+  return conditions;
+}
+
+function normalizeHistoryLimit(limit?: number) {
+  if (!limit || !Number.isFinite(limit)) {
+    return INCIDENT_HISTORY_DEFAULT_LIMIT;
+  }
+
+  return Math.max(1, Math.min(Math.floor(limit), INCIDENT_HISTORY_MAX_LIMIT));
+}
+
+function normalizeHistoryOffset(offset?: number) {
+  if (!offset || !Number.isFinite(offset)) {
+    return 0;
+  }
+
+  return Math.max(0, Math.floor(offset));
+}
+
+async function listIncidentsByIds(incidentIds: string[]) {
+  if (incidentIds.length === 0) {
+    return [];
+  }
+
+  const rows = await db
+    .select({
+      incident: incidents,
+      assignment: assignments,
+      responder: responders,
+    })
+    .from(incidents)
+    .leftJoin(assignments, eq(assignments.incidentId, incidents.id))
+    .leftJoin(responders, eq(assignments.responderId, responders.id))
+    .where(inArray(incidents.id, incidentIds))
+    .orderBy(desc(incidents.createdAt), asc(assignments.assignedAt));
+
+  const serialized = serializeIncidentRows(rows);
+  const serializedById = new Map(serialized.map((incident) => [incident.id, incident]));
+
+  return incidentIds
+    .map((incidentId) => serializedById.get(incidentId))
+    .filter((incident): incident is IncidentWithDetails => Boolean(incident));
+}
+
+export async function listIncidentsWithDetails(options?: {
+  triggeredByUserId?: string;
+  assignedResponderId?: string;
+}) {
+  const conditions = buildIncidentConditions(options);
 
   const rows = await db
     .select({
@@ -180,6 +246,38 @@ export async function listIncidentsWithDetails(options?: {
   return serializeIncidentRows(rows);
 }
 
+export async function listIncidentsWithDetailsPage(
+  options?: IncidentHistoryPageOptions
+): Promise<IncidentHistoryPage> {
+  const limit = normalizeHistoryLimit(options?.limit);
+  const offset = normalizeHistoryOffset(options?.offset);
+  const conditions = buildIncidentConditions(options);
+
+  const incidentRows = await db
+    .select({
+      incidentId: incidents.id,
+      createdAt: incidents.createdAt,
+    })
+    .from(incidents)
+    .leftJoin(assignments, eq(assignments.incidentId, incidents.id))
+    .where(conditions.length > 0 ? and(...conditions) : undefined)
+    .groupBy(incidents.id, incidents.createdAt)
+    .orderBy(desc(incidents.createdAt), desc(incidents.id))
+    .limit(limit + 1)
+    .offset(offset);
+
+  const hasMore = incidentRows.length > limit;
+  const selectedRows = hasMore ? incidentRows.slice(0, limit) : incidentRows;
+  const selectedIncidentIds = selectedRows.map((row) => row.incidentId);
+  const incidentsPage = await listIncidentsByIds(selectedIncidentIds);
+
+  return {
+    incidents: incidentsPage,
+    hasMore,
+    nextOffset: hasMore ? offset + limit : null,
+  };
+}
+
 export async function listIncidentsForResponderUser(userId: string) {
   const responder = await findResponderByUserId(userId);
 
@@ -188,6 +286,27 @@ export async function listIncidentsForResponderUser(userId: string) {
   }
 
   return listIncidentsWithDetails({ assignedResponderId: responder.id });
+}
+
+export async function listIncidentsForResponderUserPage(
+  userId: string,
+  options?: Omit<IncidentHistoryPageOptions, "assignedResponderId" | "triggeredByUserId">
+): Promise<IncidentHistoryPage> {
+  const responder = await findResponderByUserId(userId);
+
+  if (!responder) {
+    return {
+      incidents: [],
+      hasMore: false,
+      nextOffset: null,
+    };
+  }
+
+  return listIncidentsWithDetailsPage({
+    assignedResponderId: responder.id,
+    limit: options?.limit,
+    offset: options?.offset,
+  });
 }
 
 function buildDefaultAssignmentPlan(incidentType: IncidentType): AssignmentTeamPlan[] {

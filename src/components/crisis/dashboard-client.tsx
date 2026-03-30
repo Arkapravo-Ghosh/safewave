@@ -1,13 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 
 import { ProfileMenu } from "@/components/auth/profile-menu";
-import { IncidentCard } from "@/components/crisis/incident-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { useBrowserNotifications } from "@/hooks/use-browser-notifications";
 import { useRealtimeFeed, type RealtimeEvent } from "@/hooks/use-realtime-feed";
 import type { CrisisDispatchPlan, IncidentWithDetails } from "@/lib/crisis/types";
@@ -490,10 +489,15 @@ export function DashboardClient({ initialIncidents, userName, userId }: Dashboar
         <div>
           <h1 className="text-2xl font-semibold">User Dashboard</h1>
           <p className="text-sm text-muted-foreground">
-            Welcome, {userName}. Trigger incidents and track your emergency history.
+            Welcome, {userName}. Trigger incidents and monitor active emergency updates.
           </p>
         </div>
-        <ProfileMenu />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" nativeButton={false} render={<Link href="/history" />}>
+            Incident History
+          </Button>
+          <ProfileMenu />
+        </div>
       </header>
 
       <section className="grid gap-4 md:grid-cols-4">
@@ -529,10 +533,12 @@ export function DashboardClient({ initialIncidents, userName, userId }: Dashboar
           <CardDescription>Describe what is happening. SafeWave AI will auto-select responder teams.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Input
+          <textarea
             placeholder="Example: There's a fire in my apartment and two people are injured"
             value={description}
             onChange={(event) => setDescription(event.target.value)}
+            rows={5}
+            className="h-32 w-full rounded-lg border border-input bg-transparent px-2.5 py-2 text-sm leading-relaxed text-foreground placeholder:text-muted-foreground outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30 dark:disabled:bg-input/80 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 resize-none overflow-y-auto whitespace-pre-wrap wrap-break-word"
           />
           <p className="text-xs text-muted-foreground">{gpsStatusText}</p>
           <p className="text-xs text-muted-foreground">{notificationStatusText}</p>
@@ -600,14 +606,19 @@ export function DashboardClient({ initialIncidents, userName, userId }: Dashboar
         </div>
       ) : null}
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Your Incident History</h2>
-        {incidents.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No incidents triggered yet.</p>
-        ) : (
-          incidents.map((incident) => <IncidentCard key={incident.id} incident={incident} />)
-        )}
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle>Incident History</CardTitle>
+          <CardDescription>
+            View full historical incident timelines in the dedicated history page.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button variant="outline" nativeButton={false} render={<Link href="/history" />}>
+            Open Full History
+          </Button>
+        </CardContent>
+      </Card>
     </main>
   );
 }

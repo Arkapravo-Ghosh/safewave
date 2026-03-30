@@ -148,4 +148,80 @@
       radial-gradient(circle at 92% 88%, color-mix(in oklab, var(--chart-1) 14%, transparent) 0%, transparent 34%),
       linear-gradient(170deg, color-mix(in oklab, var(--background) 95%, transparent), color-mix(in oklab, var(--muted) 40%, var(--background)));
   }
+
+  .auth-shell__grid {
+    opacity: 0.45;
+    background-image:
+      linear-gradient(to right, color-mix(in oklab, var(--border) 55%, transparent) 1px, transparent 1px),
+      linear-gradient(to bottom, color-mix(in oklab, var(--border) 55%, transparent) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: radial-gradient(circle at center, black 28%, transparent 86%);
+  }
+
+  .auth-shell__panel {
+    box-shadow:
+      0 24px 52px -38px color-mix(in oklab, var(--primary) 45%, transparent),
+      0 1px 0 color-mix(in oklab, var(--background) 70%, transparent) inset;
+  }
+
+  .landing-shell__atmosphere {
+    position: absolute;
+    background-image:
+      radial-gradient(circle at 8% 12%, color-mix(in oklab, var(--chart-2) 24%, transparent) 0%, transparent 38%),
+      radial-gradient(circle at 86% 6%, color-mix(in oklab, var(--primary) 20%, transparent) 0%, transparent 36%),
+      radial-gradient(circle at 92% 82%, color-mix(in oklab, var(--chart-1) 16%, transparent) 0%, transparent 40%),
+      linear-gradient(180deg, color-mix(in oklab, var(--background) 96%, transparent), color-mix(in oklab, var(--muted) 38%, var(--background)));
+  }
+
+  .landing-shell__atmosphere::before,
+  .landing-shell__atmosphere::after {
+    content: "";
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(26px);
+    opacity: 0.4;
+  }
+
+  .landing-shell__atmosphere::before {
+    top: 10%;
+    left: 58%;
+    width: min(44vw, 420px);
+    height: min(44vw, 420px);
+    background: color-mix(in oklab, var(--chart-1) 32%, transparent);
+    animation: landing-float 11s ease-in-out infinite;
+  }
+
+  .landing-shell__atmosphere::after {
+    right: 64%;
+    bottom: -8%;
+    width: min(38vw, 340px);
+    height: min(38vw, 340px);
+    background: color-mix(in oklab, var(--primary) 34%, transparent);
+    animation: landing-float 14s ease-in-out infinite reverse;
+  }
+
+  .landing-shell__hero {
+    animation: landing-rise 460ms ease-out both;
+  }
+
+  @keyframes landing-rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes landing-float {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0);
+    }
+    50% {
+      transform: translate3d(-12px, -8px, 0);
+    }
+  }
 }

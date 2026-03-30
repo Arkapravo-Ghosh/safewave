@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 
 import { ProfileMenu } from "@/components/auth/profile-menu";
-import { IncidentCard } from "@/components/crisis/incident-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -396,7 +396,12 @@ export function AdminDashboardClient({ initialResponders, initialIncidents }: Ad
             Manage owned responders and monitor their live operational status.
           </p>
         </div>
-        <ProfileMenu />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" nativeButton={false} render={<Link href="/history" />}>
+            Incident History
+          </Button>
+          <ProfileMenu />
+        </div>
       </header>
 
       <section className="grid gap-4 md:grid-cols-3">
@@ -466,14 +471,19 @@ export function AdminDashboardClient({ initialResponders, initialIncidents }: Ad
         </CardContent>
       </Card>
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Related Incident Feed</h2>
-        {ownedIncidents.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No incidents linked to your responders yet.</p>
-        ) : (
-          ownedIncidents.map((incident) => <IncidentCard key={incident.id} incident={incident} />)
-        )}
-      </section>
+      <Card>
+        <CardHeader>
+          <CardTitle>Incident History</CardTitle>
+          <CardDescription>
+            Browse the complete incident timeline in the dedicated history view.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button variant="outline" nativeButton={false} render={<Link href="/history" />}>
+            Open Full History
+          </Button>
+        </CardContent>
+      </Card>
     </main>
   );
 }

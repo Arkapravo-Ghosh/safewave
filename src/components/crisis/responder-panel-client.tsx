@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 
 import { ProfileMenu } from "@/components/auth/profile-menu";
@@ -351,7 +352,12 @@ export function ResponderPanelClient({ initialIncidents, responderProfile }: Res
             Live incident stream with action controls for assigned emergencies.
           </p>
         </div>
-        <ProfileMenu />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" nativeButton={false} render={<Link href="/history" />}>
+            Incident History
+          </Button>
+          <ProfileMenu />
+        </div>
       </header>
 
       <Card>

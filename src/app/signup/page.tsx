@@ -16,7 +16,7 @@ export default async function SignupPage() {
     <AuthShell
       badge="Create account"
       title="Set up your SafeWave identity"
-      description="Create your account and start with the default user role. Admin and superadmin permissions can be assigned by privileged accounts later."
+      description="Create your account now so you can ask for help fast whenever an emergency happens."
     >
       <SignupForm />
     </AuthShell>

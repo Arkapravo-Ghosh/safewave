@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 
 import { ProfileMenu } from "@/components/auth/profile-menu";
@@ -187,7 +188,12 @@ export function SuperadminDashboardClient({
             Admin governance, metadata monitoring, and global incident telemetry.
           </p>
         </div>
-        <ProfileMenu />
+        <div className="flex items-center gap-2">
+          <Button variant="outline" nativeButton={false} render={<Link href="/history" />}>
+            Incident History
+          </Button>
+          <ProfileMenu />
+        </div>
       </header>
 
       <section className="grid gap-4 md:grid-cols-4">
